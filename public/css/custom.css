@@ -1,0 +1,25 @@
+body {
+  font-family: century Gothic;
+}
+.toolbar-container-collapsed * {
+  opacity: 0;
+  -webkit-transition-duration: 0.5s;
+}
+.toolbar-container-collapsed:hover * {
+  opacity: 1;
+}
+.toolbar-container {
+  position: fixed;
+  top: 10px;
+  left: 10px;
+  opacity: 1;
+  height: 20em;
+  width: 15em;
+  z-index: 999;
+  background-color: rgba(221, 221, 221, 0.5);
+}
+.hiddenInput {
+  width: 0px;
+  height: 0px;
+  overflow: hidden;
+}

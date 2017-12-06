@@ -1,0 +1,168 @@
+<html>
+  <head>
+    <title>PaintVR</title>
+    <meta name="description" content="VR Photo Editor">
+
+    <!-- js libraries -->
+    <script src="public/lib/js/aframe.min.js"></script>
+    <script src="public/lib/js/aframe-extras.min.js"></script>
+    <script src="public/lib/js/jquery.min.js"></script>
+    <script src="public/lib/js/bootstrap.min.js"></script>
+    <script src="public/lib/js/filesaver.min.js"></script>
+    <script src="public/lib/js/spectrum.js"></script>
+
+    <!-- custom js -->
+    <script src="public/js/CanvasHelper.js"></script>
+    <script src="public/js/ToolsHelper.js"></script>
+    <script src="public/js/EventsHelper.js"></script>
+    <script src="public/js/FileHelper.js"></script>
+    <script src="public/js/ErrorHelper.js"></script>
+    <script src="public/lib/js/aframe-paint-component.js"></script>
+
+    <!-- css libraries -->
+    <link rel="stylesheet" href="public/lib/css/bootstrap.min.css" type="text/css" />
+    <link rel='stylesheet' href="public/lib/css/spectrum.css" type="text/css" />
+
+    <!-- custom css -->
+    <link rel="stylesheet" href="public/css/custom.css" type="text/css" />
+
+  </head>
+  <body>
+
+    <div style="z-index:1001;background-color:black;height:10px;width:10px;top:10px;left:10px;position:absolute;" class="toolbar-button hidden-md-up" onclick="showToolbar()">
+      <span>SHOW!</span>
+    </div>
+
+    <div class="toolbar toolbar-container">
+      <div class="row file_menu" style="margin-top:10px;">
+        <div class="col-md-6">
+          <input class="hiddenInput" type="file">
+            <div class="btn open">Open</div>
+          </input>
+        </div>
+        <div class="col-md-6">
+          <div class="btn btn-success save">Save
+          </div>
+        </div>
+      </div>
+
+      <div class="row tools_menu" style="margin-top:10px;">
+      </div>
+
+      <div class="row colors_menu" style="margin-top:10px;">
+        <div class="col-md-6">
+          <input type='text' id="full"/>
+        </div>
+      </div>
+    </div>
+
+    <a-scene>
+
+      <!-- user -->
+      <a-entity 
+        camera 
+        rotation="0 0 0"
+        id="camera">
+      </a-entity>
+
+      <a-entity
+        id="paint"
+        position="0 0 0"
+        paint>
+      </a-entity>
+    </a-scene>
+
+    <script type="text/javascript">
+
+      ////////////////////////////////////////
+      ///// detect browser
+      ////////////////////////////////////////
+      function detectmob() { 
+        if(navigator.userAgent.match(/Android/i)
+        || navigator.userAgent.match(/webOS/i)
+        || navigator.userAgent.match(/iPhone/i)
+        || navigator.userAgent.match(/iPad/i)
+        || navigator.userAgent.match(/iPod/i)
+        || navigator.userAgent.match(/BlackBerry/i)
+        || navigator.userAgent.match(/Windows Phone/i)
+        ){
+          return true
+        } else {
+          return false
+        }
+      }
+
+      if (detectmob() == true) {
+        document.getElementById('camera').setAttributeNode(document.createAttribute("look-controls"))
+        hideToolbar()
+      } else {
+        document.getElementById('camera').setAttributeNode(document.createAttribute("universal-controls"))
+        document.getElementById('camera').setAttribute("universal-controls", "fly: true;")
+      }
+
+      function showToolbar() {
+        $('.toolbar').show()
+      }
+
+      function hideToolbar() {
+        $('.toolbar').hide()
+      }
+
+
+      ////////////////////////////////////////
+      ///// open image event handler
+      ////////////////////////////////////////
+      $(".toolbar-container .open").on('click', function() {
+        $('.hiddenInput').trigger('click') 
+      })
+
+      $('.hiddenInput').on('change', function (e) {
+        var file = e.target.files[0]
+        if (file.type.match('image.*')) {
+          FileHelper.openImage(file)
+        }
+      })
+
+      ////////////////////////////////////////
+      ///// save image event handler
+      ////////////////////////////////////////
+      $(".toolbar-container .save").on('click', function() {
+        FileHelper.saveImage()
+      })
+
+      ////////////////////////////////////////
+      ///// initialize colorpicker
+      ////////////////////////////////////////
+      $("#full").spectrum({
+          color: "#000",
+          showInput: true,
+          className: "full-spectrum",
+          showInitial: true,
+          showPalette: true,
+          showSelectionPalette: true,
+          maxSelectionSize: 10,
+          preferredFormat: "hex",
+          localStorageKey: "spectrum.demo",
+          change: function(color) {
+              ToolsHelper.setActiveColor(color.toHexString())
+          },
+          palette: [
+              ["rgb(0, 0, 0)", "rgb(67, 67, 67)", "rgb(102, 102, 102)",
+              "rgb(204, 204, 204)", "rgb(217, 217, 217)","rgb(255, 255, 255)"],
+              ["rgb(152, 0, 0)", "rgb(255, 0, 0)", "rgb(255, 153, 0)", "rgb(255, 255, 0)", "rgb(0, 255, 0)",
+              "rgb(0, 255, 255)", "rgb(74, 134, 232)", "rgb(0, 0, 255)", "rgb(153, 0, 255)", "rgb(255, 0, 255)"], 
+              ["rgb(230, 184, 175)", "rgb(244, 204, 204)", "rgb(252, 229, 205)", "rgb(255, 242, 204)", "rgb(217, 234, 211)", 
+              "rgb(208, 224, 227)", "rgb(201, 218, 248)", "rgb(207, 226, 243)", "rgb(217, 210, 233)", "rgb(234, 209, 220)", 
+              "rgb(221, 126, 107)", "rgb(234, 153, 153)", "rgb(249, 203, 156)", "rgb(255, 229, 153)", "rgb(182, 215, 168)", 
+              "rgb(162, 196, 201)", "rgb(164, 194, 244)", "rgb(159, 197, 232)", "rgb(180, 167, 214)", "rgb(213, 166, 189)", 
+              "rgb(204, 65, 37)", "rgb(224, 102, 102)", "rgb(246, 178, 107)", "rgb(255, 217, 102)", "rgb(147, 196, 125)", 
+              "rgb(118, 165, 175)", "rgb(109, 158, 235)", "rgb(111, 168, 220)", "rgb(142, 124, 195)", "rgb(194, 123, 160)",
+              "rgb(166, 28, 0)", "rgb(204, 0, 0)", "rgb(230, 145, 56)", "rgb(241, 194, 50)", "rgb(106, 168, 79)",
+              "rgb(69, 129, 142)", "rgb(60, 120, 216)", "rgb(61, 133, 198)", "rgb(103, 78, 167)", "rgb(166, 77, 121)",
+              "rgb(91, 15, 0)", "rgb(102, 0, 0)", "rgb(120, 63, 4)", "rgb(127, 96, 0)", "rgb(39, 78, 19)", 
+              "rgb(12, 52, 61)", "rgb(28, 69, 135)", "rgb(7, 55, 99)", "rgb(32, 18, 77)", "rgb(76, 17, 48)"]
+          ]
+      })
+    </script>
+  </body>
+</html>
